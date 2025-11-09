@@ -1,4 +1,4 @@
-//  CLASE CITA 
+// CLASE CITA
 class Cita {
     constructor(id, fecha, hora, nombre, apellidos, dni, telefono, fechaNacimiento, observaciones) {
         this.id = id;
@@ -13,34 +13,35 @@ class Cita {
     }
 }
 
-//  VARIABLES 
+// VARIABLES
 const formulario = document.getElementById("cita-form");
 const tablaCitas = document.getElementById("tabla-citas").querySelector("tbody");
-let citas = []; // variable donde almacenaremos las citas
-let citaEditando = null; // variable null por defecto, cambiará cuando estemos editando una cita
+let citas = []; // array de citas donde se almacenarán
+let citaEditando = null; // mientras no editemos ninguna cita, esta variable se mantiene null
 
-//  FUNCIONES 
-// elimina los bordes rojos de los campos con errores y evita que se acumulen entre si
+// FUNCIONES
 function limpiarErrores() {
+    // elimina los bordes rojos de los errores y los limpa antes de validar de nuevo para que no se acumulen
     document.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
     document.querySelectorAll(".mensaje-error").forEach(el => el.remove());
 }
 
-// cogemos el id de un campo
+// añade el borde rojo a modo de error
 function mostrarError(idCampo, mensaje) {
     const campo = document.getElementById(idCampo);
     if (!campo) return;
-    campo.classList.add("input-error"); // ponemos un borde rojo al campo input-error
+    campo.classList.add("input-error");
 
     if (!campo.nextElementSibling || !campo.nextElementSibling.classList.contains("mensaje-error")) {
-        const span = document.createElement("div"); // creamos un div con un mensaje de error debajo si no está creado ya
+        const span = document.createElement("div"); // crea un div con un mensaje si no lo ha creado ya así evita que se dupliquen
         span.classList.add("mensaje-error");
         span.textContent = mensaje;
         campo.insertAdjacentElement("afterend", span);
     }
 }
 
-// validamos el formulario comprobando que todos los campos tienen datos, si alguno falla, muestra un mensaje de error y devuevle false
+// limpiamos todos los errores primero
+// se recibe "datos" con la información del formulario, si alguno falla llama a mostrarError
 function validarFormulario(datos) {
     let esValido = true;
     limpiarErrores();
@@ -61,38 +62,39 @@ function validarFormulario(datos) {
     return esValido;
 }
 
-// convierte el array de las citas en JSON y lo guarda en el navegador, permitiendo que se mantenga aunque el navegador se cierre
+// LOCALSTORAGE
 function guardarEnLocalStorage() {
-    localStorage.setItem("citas", JSON.stringify(citas));
+    localStorage.setItem("citas", JSON.stringify(citas)); // convierte el array citas a un JSON y lo guarda en el navegador aunque este se cierre
 }
 
-// recupera los datos del JSON y los guarda en un array
+// recupera los datos del JSON y los vuelve a transformar en un array
 function cargarDesdeLocalStorage() {
-    const citasGuardadas = JSON.parse(localStorage.getItem("citas"));
+    const citasGuardadas = JSON.parse(localStorage.getItem("citas")); 
     citas = Array.isArray(citasGuardadas) ? citasGuardadas : [];
 }
 
-// MODAL
-
-// abre la ventana emergente con el texto de las observaciones completo, si se clica en la X o fuera del cuadro, la ventana se cierra
+// Ventana emergente de observaciones
 const modal = document.getElementById("modal-observaciones");
 const modalTexto = document.getElementById("modal-texto");
-const spanCerrar = document.querySelector(".close-modal");
+const cerrarModal = document.getElementById("cerrar-modal");
 
+// abre la ventana emergente con el texto completo
 function abrirModal(texto) {
     modalTexto.textContent = texto;
-    modal.style.display = "block";
+    modal.hidden = false;
 }
-// oculta el cuadrado si se clica
-spanCerrar.onclick = () => modal.style.display = "none";
-window.onclick = event => { if(event.target === modal) modal.style.display = "none"; };
+
+// si se clica en cualquier parte hidden se vuelve true y se oculta
+cerrarModal.onclick = () => modal.hidden = true;
+window.onclick = (event) => { if(event.target === modal) modal.hidden = true; };
+
 
 // MOSTRAR CITAS
-
-// limpiamos la tabla de citas
 function mostrarCitas() {
+    // limpa la tabla antes de mostrar la cita
     tablaCitas.innerHTML = "";
 
+    // si no hay citas muestra "Dato vacío"
     if(citas.length === 0) {
         const filaVacia = document.createElement("tr");
         filaVacia.id = "dato-vacio";
@@ -101,7 +103,7 @@ function mostrarCitas() {
         return;
     }
 
-    // para cada elemento de la cita creamos un tr
+    // por cada cita crea un tr con los datos
     citas.forEach((cita,index) => {
         const fila = document.createElement("tr");
         fila.innerHTML = `
@@ -122,17 +124,18 @@ function mostrarCitas() {
         `;
         tablaCitas.appendChild(fila);
 
-        // evento modal, si clicamos, se abre la ventana modal
+        // Mostrar observaciones completas al clicar
         const celdaObs = fila.querySelector(".observaciones");
         celdaObs.addEventListener("click", () => abrirModal(cita.observaciones));
     });
 }
 
-// GUARDAR CITAS
+// GUARDAR O ACTUALIZAR CITAS
 function guardarCita(event) {
+    // previene que el formulario recargue la página
     event.preventDefault();
 
-    // tomamos los datos del formulario y lo validamos
+    // asignamos los valores a los campos, los validamos, y eliminamos espacios al principio y final con trim()
     const datos = {
         fecha: document.getElementById("fecha").value,
         hora: document.getElementById("Hora").value,
@@ -146,27 +149,27 @@ function guardarCita(event) {
 
     if(!validarFormulario(datos)) return;
 
-    // si estmaos editando se actualiza la cita existente y si es nueva, crea un id
+    // si estamos editando, la cita existente se actualiza
     if(citaEditando) {
         const index = citas.findIndex(c => c.id === citaEditando);
         if(index !== -1) citas[index] = { ...citas[index], ...datos };
         citaEditando = null;
         alert("Cita modificada correctamente");
     } else {
+        // si no, crea un objeto cita y le asigna un ID nuevo
         const id = Date.now().toString();
         const nuevaCita = new Cita(id, datos.fecha, datos.hora, datos.nombre, datos.apellidos, datos.dni, datos.telefono, datos.fechaNacimiento, datos.observaciones);
         citas.push(nuevaCita);
         alert("Cita creada correctamente");
     }
 
-    // guardamos la cita en LocalStorage y la mostramos en la tabla
+    // lo guardamos en LocalStorage, la mostramos y borramos el formulario
     guardarEnLocalStorage();
     mostrarCitas();
     formulario.reset();
 }
 
 // ELIMINAR / EDITAR
-// recorremos el array y eliminamos la cita que coincida 
 function eliminarCita(id) {
     if(confirm("¿Seguro que quieres eliminar esta cita?")) {
         citas = citas.filter(c => c.id !== id);
@@ -175,7 +178,7 @@ function eliminarCita(id) {
     }
 }
 
-// editamos la cita cogiendo los datos de cada campo
+// carga los datos en el formulario para editarlos
 function editarCita(id) {
     const cita = citas.find(c => c.id === id);
     if(!cita) return alert("Cita no encontrada");
@@ -189,12 +192,11 @@ function editarCita(id) {
     document.getElementById("fecha-nacimiento").value = cita.fechaNacimiento;
     document.getElementById("Obvservaciones").value = cita.observaciones;
 
-    // subimos el formulario a la parte superior de la pantalla
     citaEditando = id;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" }); // lleva el scroll a la parte superior de la pantalla
 }
 
-// al enviar el formulario se ejecuta guardar cita, la cargamos desde el localStorage y la mostramoss
+// EVENTOS
 formulario.addEventListener("submit", guardarCita);
 window.addEventListener("DOMContentLoaded", () => {
     cargarDesdeLocalStorage();
