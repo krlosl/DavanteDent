@@ -1,4 +1,4 @@
-/* Estilos generales */
+/* Estilos generales de la página (sin cambios) */
 * {
     margin: 0;
     padding: 0;
@@ -20,7 +20,7 @@ header {
     color: white;
     padding: 15px 0;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 header .logo {
@@ -42,7 +42,7 @@ header .logo {
     margin: 30px auto;
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
 }
 
@@ -112,7 +112,7 @@ button#guardar-cita:hover {
     margin: 20px auto 40px;
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
 }
 
@@ -123,7 +123,7 @@ button#guardar-cita:hover {
 }
 
 table {
-    table-layout: auto;
+    table-layout: auto; /* cambiamos a auto para que se ajuste según el contenido */
     width: 100%;
     border-collapse: collapse;
 }
@@ -146,13 +146,34 @@ table th {
     font-style: italic;
 }
 
-/* Observaciones clicables */
+/* Observaciones: varias líneas y scroll interno si es muy largo */
 #tabla-citas td:nth-child(9) {
-    cursor: pointer;
-    white-space: normal;
+    max-width: 220px;
+    white-space: normal;        /* permite varias líneas */
     overflow: hidden;
     word-wrap: break-word;
-    max-height: 60px;
+    display: block;
+    height: 60px;               /* altura fija de celda */
+    line-height: 1.2em;
+    padding: 4px;
+    position: relative;
+}
+
+/* Tooltip completo al pasar el ratón */
+#tabla-citas td:nth-child(9):hover::after {
+    content: attr(data-fulltext);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: #f9f9f9;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 8px;
+    width: 300px;
+    white-space: normal;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    border-radius: 6px;
 }
 
 /* BOTONES */
@@ -204,48 +225,6 @@ footer {
     font-size: 14px;
 }
 
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-}
-
-.modal-content p {
-    white-space: pre-wrap;
-}
-
-.close-modal {
-    color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-modal:hover {
-    color: #000;
-}
-
 /* MEDIA QUERIES */
 @media (max-width: 768px) {
     form fieldset {
@@ -261,4 +240,39 @@ table td {
 
 button#guardar-cita {
     font-size: 15px;
+}
+#modal-observaciones {
+    hidden: true;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+#modal-observaciones[hidden] {
+    display: none;
+}
+
+.modal-contenido {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+}
+
+#cerrar-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 20px;
 }
